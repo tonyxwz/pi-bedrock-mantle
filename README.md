@@ -9,8 +9,20 @@ with Mantle's server-side [web search](https://docs.aws.amazon.com/bedrock/lates
   across turns.
 - Routes each model to a Region that serves it, configurable per model.
 
-Pi's built-in `amazon-bedrock` provider uses Converse on `bedrock-runtime`, where server-side tools
-are unavailable, and does not serve the Mantle-only GPT models.
+## Why this exists
+
+1. **SigV4 for Mantle.** Mantle accepts a Bedrock API key or an AWS SigV4 signature. Many AWS
+   accounts cannot or do not issue Bedrock API keys, and use IAM roles, SSO or profiles instead.
+   Pi's built-in `amazon-bedrock` provider signs with SigV4, but only for Converse on
+   `bedrock-runtime`, which does not serve the Mantle-only GPT models and has no server-side tools.
+   This extension signs Mantle requests with the standard AWS credential chain, so no API key is
+   needed.
+2. **Server-side tools belong in an extension.** Pi's authors decided not to support provider
+   server-side tools such as web search in pi itself: they do not carry over between providers, and
+   they leave transcript entries that other providers cannot read
+   ([#7704](https://github.com/earendil-works/pi/issues/7704)). We agree. Pi is extensible enough
+   that a provider-specific feature can live in a provider-specific extension, and this one keeps
+   Mantle's server tools, and the search history they produce, inside the `bedrock-mantle` provider.
 
 ## Install
 
