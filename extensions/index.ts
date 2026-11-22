@@ -16,7 +16,7 @@ import {
 } from "@earendil-works/pi-ai/compat";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { mantleBaseUrl, mantleModels } from "./models.ts";
+import { mantleBaseUrl, mantleModels, readModelLists, regionOfBaseUrl, savedModelLists } from "./models.ts";
 import { readMantleSettings } from "./settings.ts";
 import { createMantleSigV4Fetch } from "./sigv4-fetch.ts";
 import {
@@ -33,9 +33,8 @@ const PROVIDER_ID = "bedrock-mantle";
 // openai-responses implementation, which other providers keep using.
 const PROVIDER_API = "bedrock-mantle-responses";
 const ENTRY_TYPE = "bedrock-mantle-web-search";
-const REGION_IN_BASE_URL = /^https:\/\/bedrock-mantle\.([a-z0-9-]+)\.api\.aws\//;
 
-export default async function (pi: ExtensionAPI) {
+export default function (pi: ExtensionAPI) {
 	// Read once per load; /reload picks up changes.
 	const settings = readMantleSettings();
 	const fetches = new Map<string, typeof fetch>();
@@ -59,7 +58,7 @@ export default async function (pi: ExtensionAPI) {
 		context: TranscriptContext,
 		options?: SimpleStreamOptions,
 	): AssistantMessageEventStream => {
-		const region = REGION_IN_BASE_URL.exec(model.baseUrl)?.[1];
+		const region = regionOfBaseUrl(model.baseUrl);
 		if (!region) throw new Error(`${model.id}: base URL ${model.baseUrl} is not a Bedrock Mantle endpoint`);
 		const responsesModel = { ...model, api: "openai-responses" } as Model<"openai-responses">;
 		const inner = openAIResponsesApi().streamSimple(responsesModel, toResponsesContext(context), {
@@ -85,7 +84,18 @@ export default async function (pi: ExtensionAPI) {
 		baseUrl: mantleBaseUrl(settings.region),
 		apiKey: "sigv4",
 		api: PROVIDER_API,
-		models: await mantleModels(settings, fetchForRegion),
+		// Until the first refresh, every model is offered in its pinned or home Region.
+		models: mantleModels(settings, new Map(), PROVIDER_ID, PROVIDER_API),
+		// Model lists come from the network only when pi allows it, which interactive mode does in the
+		// background after startup. Startup and print mode use the models saved by the last refresh.
+		refreshModels: async (context) => {
+			const saved = context.stored ? savedModelLists(context.stored.models, settings.regions) : new Map();
+			if (!context.allowNetwork) return mantleModels(settings, saved, PROVIDER_ID, PROVIDER_API);
+			const lists = await readModelLists(settings.regions, fetchForRegion, saved, context.signal);
+			const models = mantleModels(settings, lists, PROVIDER_ID, PROVIDER_API);
+			await context.publish({ persist: { models, checkedAt: Date.now() } });
+			return models;
+		},
 		streamSimple: streamMantle,
 	});
 

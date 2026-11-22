@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0]
+
+### Changed
+
+- Region model lists no longer delay startup. Interactive pi reads them in the background and saves
+  the resulting models in pi's model store; later starts, print mode and `--list-models` use the
+  saved models.
+
 ## [0.1.0]
 
 ### Added

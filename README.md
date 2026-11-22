@@ -79,10 +79,16 @@ project may not be trusted yet.
 ### Regions
 
 Each model goes to its pinned Region, else to the first of `region`, then `regions`, whose
-`GET /v1/models` list includes it. The lists are read at startup, all Regions at once, with a 3 s
-timeout each. Models that no list includes are hidden. If a Region's list cannot be read, that
-Region counts as serving every model, so a failed read hides nothing. Models outside the home Region
-show it in their name, e.g. "GPT-6 Luna (us-east-1)".
+`GET /v1/models` list includes it. Models that no list includes are hidden. Models outside the home
+Region show it in their name, e.g. "GPT-6 Luna (us-east-1)".
+
+The lists never delay startup. Interactive pi reads them in the background after it starts, all
+Regions at once, and saves the resulting models in pi's model store (`~/.pi/agent/models-store.json`).
+Later starts, print mode (`-p`) and `--list-models` use the saved models; the model selector updates
+when the background read finishes. Pinned Regions apply immediately. Before the first background
+read, every model is offered in its pinned or home Region. A Region added to `regions` serves no
+models until the next background read, and a Region whose list cannot be read keeps its saved list.
+Opening the model selector (`/model`) also reads them again.
 
 Requests, web searches and prompt caches stay in the model's Region. Adding Regions to `regions` or
 pinning a model to another Region sends that model's prompts there.

@@ -1,6 +1,6 @@
 {
 	"name": "pi-bedrock-mantle",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Pi provider for OpenAI GPT models on Amazon Bedrock Mantle, signed with SigV4, with Mantle's server-side web search.",
 	"keywords": ["pi-package", "pi", "amazon-bedrock", "bedrock-mantle", "openai", "web-search"],
 	"license": "MIT",
