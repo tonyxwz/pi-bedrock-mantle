@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { assignRegions } from "../src/models.ts";
+import { assignRegions } from "../extensions/models.ts";
 
 const lists = new Map<string, ReadonlySet<string> | undefined>([
 	["us-east-2", new Set(["openai.gpt-5.6-luna"])],

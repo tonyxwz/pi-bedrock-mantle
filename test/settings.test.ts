@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checkSettings } from "../src/settings.ts";
+import { checkSettings } from "../extensions/settings.ts";
 
 test("fills in defaults", () => {
 	const settings = checkSettings({ region: "us-east-2" });

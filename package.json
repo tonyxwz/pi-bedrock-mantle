@@ -11,9 +11,9 @@
 	},
 	"homepage": "https://github.com/tonyxwz/pi-bedrock-mantle#readme",
 	"type": "module",
-	"files": ["src", "README.md", "CHANGELOG.md", "LICENSE"],
+	"files": ["extensions", "README.md", "CHANGELOG.md", "LICENSE"],
 	"pi": {
-		"extensions": ["./src/index.ts"]
+		"extensions": ["./extensions/index.ts"]
 	},
 	"scripts": {
 		"check": "tsc --noEmit",

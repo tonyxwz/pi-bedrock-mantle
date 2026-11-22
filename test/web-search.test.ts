@@ -1,7 +1,7 @@
 // Tests for web-search.ts: recording search calls and replaying them in place. Run: npm test
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { prepareResponsesPayload, recordWebSearch, type RecordedWebSearchCall } from "../src/web-search.ts";
+import { prepareResponsesPayload, recordWebSearch, type RecordedWebSearchCall } from "../extensions/web-search.ts";
 
 const ws = (id: string) => ({ type: "web_search_call", id, status: "completed", action: { type: "search", query: id } });
 const output = [{ type: "reasoning", id: "rs_1" }, ws("ws_1"), { type: "reasoning", id: "rs_2" }, ws("ws_2"), ws("ws_3"), { type: "message", id: "msg_1", content: [{ type: "output_text", annotations: [{ type: "url_citation", title: "A", url: "https://a" }, { type: "url_citation", title: "A", url: "https://a" }] }] }];
