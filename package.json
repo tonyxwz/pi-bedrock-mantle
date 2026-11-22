@@ -1,0 +1,38 @@
+{
+	"name": "pi-bedrock-mantle",
+	"version": "0.1.0",
+	"description": "Pi provider for OpenAI GPT models on Amazon Bedrock Mantle, signed with SigV4, with Mantle's server-side web search.",
+	"keywords": ["pi-package", "pi", "amazon-bedrock", "bedrock-mantle", "openai", "web-search"],
+	"license": "MIT",
+	"author": "tonyxwz",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tonyxwz/pi-bedrock-mantle.git"
+	},
+	"homepage": "https://github.com/tonyxwz/pi-bedrock-mantle#readme",
+	"type": "module",
+	"files": ["src", "README.md", "CHANGELOG.md", "LICENSE"],
+	"pi": {
+		"extensions": ["./src/index.ts"]
+	},
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "node --test test/*.test.ts"
+	},
+	"dependencies": {
+		"@aws-sdk/credential-provider-node": "3.972.82",
+		"@smithy/signature-v4": "5.7.3"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-ai": "1.6.0",
+		"@earendil-works/pi-coding-agent": "1.6.0",
+		"@earendil-works/pi-tui": "1.6.0",
+		"@types/node": "26.6.6",
+		"typescript": "7.0.2"
+	}
+}
