@@ -80,7 +80,7 @@ project may not be trusted yet.
 
 Each model goes to its pinned Region, else to the first of `region`, then `regions`, whose
 `GET /v1/models` list includes it. Models that no list includes are hidden. Models outside the home
-Region show it in their name, e.g. "GPT-6 Luna (us-east-1)".
+Region are named after it, so the selector shows e.g. `openai.gpt-6-luna (us-east-1)`.
 
 The lists never delay startup. Interactive pi reads them in the background after it starts, all
 Regions at once, and saves the resulting models in pi's model store (`~/.pi/agent/models-store.json`).

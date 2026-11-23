@@ -46,7 +46,8 @@ export function mantleModels(
 			{
 				type: "chat",
 				id: model.id,
-				name: region === settings.region ? model.name : `${model.name} (${region})`,
+				// The selector shows "<id> (<name>)", so a Region is enough for models outside the home Region.
+				name: region === settings.region ? model.name : region,
 				provider,
 				api,
 				baseUrl: mantleBaseUrl(region),
