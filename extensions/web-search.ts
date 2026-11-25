@@ -124,9 +124,9 @@ function neighbourId(items: readonly OutputItem[], index: number, direction: 1 |
 }
 
 /** The `url_citation` annotations of the response's messages, one per URL. */
-function citedSources(items: readonly OutputItem[]): CitedSource[] {
+export function citedSources(items: readonly unknown[]): CitedSource[] {
 	const sources = new Map<string, CitedSource>();
-	for (const item of items) {
+	for (const item of items as readonly OutputItem[]) {
 		if (item.type !== "message") continue;
 		for (const part of item.content ?? []) {
 			for (const annotation of part.annotations ?? []) {

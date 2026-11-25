@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0]
+
+### Added
+
+- `bedrock_web_search` tool for models of other providers, which searches through a Mantle GPT
+  model. Configure it with `webSearchTool`; Mantle's own GPT models do not get it.
+
+### Changed
+
+- Models outside the home Region keep their catalog name and add the Region, e.g.
+  "GPT-6.2 Astra (us-east-1)".
+
 ## [0.2.0]
 
 ### Changed

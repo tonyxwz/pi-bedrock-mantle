@@ -9,6 +9,14 @@ export interface MantleModelSettings {
 	region?: string;
 }
 
+/** The `bedrock_web_search` tool offered to models of other providers. */
+export interface WebSearchToolSettings {
+	/** Mantle model that runs the searches. */
+	model: string;
+	/** Reasoning effort of the search requests. */
+	reasoningEffort: string;
+}
+
 /** The extension's settings, checked. */
 export interface MantleSettings {
 	/** Region for models without a pinned Region, and the provider's base URL. */
@@ -19,12 +27,16 @@ export interface MantleSettings {
 	models: Record<string, MantleModelSettings>;
 	/** Responses server tools added to every request. */
 	serverTools: Record<string, unknown>[];
+	/** The web search tool for other providers' models; undefined when turned off. */
+	webSearchTool: WebSearchToolSettings | undefined;
 }
 
 export const SETTINGS_KEY = "pi-bedrock-mantle";
 
 // Codex sends the same: retrieval stays inside AWS, and Fetch needs no ExternalWebAccess permission.
 const DEFAULT_SERVER_TOOLS: Record<string, unknown>[] = [{ type: "web_search", external_web_access: false }];
+// Cheap, fast, and served in every Region that has web search.
+const DEFAULT_WEB_SEARCH_TOOL: WebSearchToolSettings = { model: "openai.gpt-5.6-luna", reasoningEffort: "low" };
 
 /**
  * Read the settings from the global settings.json. Extensions cannot call `pi.getSettings()`
@@ -59,7 +71,25 @@ export function checkSettings(raw: unknown): MantleSettings {
 		}
 		serverTools = raw.serverTools;
 	}
-	return { region, regions: [...new Set([region, ...extraRegions])], models, serverTools };
+	return {
+		region,
+		regions: [...new Set([region, ...extraRegions])],
+		models,
+		serverTools,
+		webSearchTool: checkWebSearchTool(raw.webSearchTool),
+	};
+}
+
+/** `webSearchTool`: `false` turns the tool off, an object overrides the defaults. */
+function checkWebSearchTool(value: unknown): WebSearchToolSettings | undefined {
+	if (value === undefined) return DEFAULT_WEB_SEARCH_TOOL;
+	if (value === false) return undefined;
+	if (!isObject(value)) throw settingsError('"webSearchTool" must be false or an object');
+	return {
+		model: optionalString(value.model, "webSearchTool.model") ?? DEFAULT_WEB_SEARCH_TOOL.model,
+		reasoningEffort:
+			optionalString(value.reasoningEffort, "webSearchTool.reasoningEffort") ?? DEFAULT_WEB_SEARCH_TOOL.reasoningEffort,
+	};
 }
 
 function optionalString(value: unknown, name: string): string | undefined {

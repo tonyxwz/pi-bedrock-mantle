@@ -11,6 +11,7 @@ test("fills in defaults", () => {
 		regions: ["us-east-2"],
 		models: {},
 		serverTools: [{ type: "web_search", external_web_access: false }],
+		webSearchTool: { model: "openai.gpt-5.6-luna", reasoningEffort: "low" },
 	});
 });
 
@@ -29,9 +30,18 @@ test("keeps per-model Regions and server tools", () => {
 	assert.deepEqual(settings.serverTools, []);
 });
 
+test("configures or turns off the web search tool", () => {
+	assert.deepEqual(checkSettings({ webSearchTool: { model: "openai.gpt-6.2-astra" } }).webSearchTool, {
+		model: "openai.gpt-6.2-astra",
+		reasoningEffort: "low",
+	});
+	assert.equal(checkSettings({ webSearchTool: false }).webSearchTool, undefined);
+});
+
 test("rejects malformed settings with the setting's name", () => {
 	assert.throws(() => checkSettings({ region: 5 }), /"region" must be a non-empty string/);
 	assert.throws(() => checkSettings({ regions: "us-east-1" }), /"regions" must be an array/);
 	assert.throws(() => checkSettings({ models: { a: "us-east-1" } }), /"models.a" must be an object/);
 	assert.throws(() => checkSettings({ serverTools: [1] }), /"serverTools" must be an array of tool objects/);
+	assert.throws(() => checkSettings({ webSearchTool: true }), /"webSearchTool" must be false or an object/);
 });

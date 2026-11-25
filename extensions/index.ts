@@ -27,6 +27,7 @@ import {
 	type WebSearchCallItem,
 	type WebSearchRecord,
 } from "./web-search.ts";
+import { registerWebSearchTool, withoutWebSearchTool } from "./web-search-tool.ts";
 
 const PROVIDER_ID = "bedrock-mantle";
 // A custom api id routes this provider's models to streamMantle instead of the built-in
@@ -46,6 +47,9 @@ export default function (pi: ExtensionAPI) {
 		}
 		return signedFetch;
 	};
+	// Mantle's GPT models search natively, so they do not need the tool for other providers.
+	const nativeSearch = settings.serverTools.some((tool) => tool.type === "web_search");
+	let models = mantleModels(settings, new Map(), PROVIDER_ID, PROVIDER_API);
 	const recorded = new Map<string, RecordedWebSearchCall>();
 	const pending = new Map<string, WebSearchRecord>();
 
@@ -67,7 +71,8 @@ export default function (pi: ExtensionAPI) {
 			apiKey: "sigv4",
 			fetch: fetchForRegion(region),
 			onPayload: async (payload, payloadModel) => {
-				const prepared = prepareResponsesPayload(payload, settings.serverTools, recorded);
+				const withServerTools = prepareResponsesPayload(payload, settings.serverTools, recorded);
+				const prepared = nativeSearch ? withoutWebSearchTool(withServerTools) : withServerTools;
 				return (await options?.onPayload?.(prepared, payloadModel)) ?? prepared;
 			},
 			onProviderStreamEvent: async (data, eventModel) => {
@@ -85,19 +90,35 @@ export default function (pi: ExtensionAPI) {
 		apiKey: "sigv4",
 		api: PROVIDER_API,
 		// Until the first refresh, every model is offered in its pinned or home Region.
-		models: mantleModels(settings, new Map(), PROVIDER_ID, PROVIDER_API),
+		models,
 		// Model lists come from the network only when pi allows it, which interactive mode does in the
 		// background after startup. Startup and print mode use the models saved by the last refresh.
 		refreshModels: async (context) => {
 			const saved = context.stored ? savedModelLists(context.stored.models, settings.regions) : new Map();
-			if (!context.allowNetwork) return mantleModels(settings, saved, PROVIDER_ID, PROVIDER_API);
+			if (!context.allowNetwork) {
+				models = mantleModels(settings, saved, PROVIDER_ID, PROVIDER_API);
+				return models;
+			}
 			const lists = await readModelLists(settings.regions, fetchForRegion, saved, context.signal);
-			const models = mantleModels(settings, lists, PROVIDER_ID, PROVIDER_API);
+			models = mantleModels(settings, lists, PROVIDER_ID, PROVIDER_API);
 			await context.publish({ persist: { models, checkedAt: Date.now() } });
 			return models;
 		},
 		streamSimple: streamMantle,
 	});
+
+	if (settings.webSearchTool) {
+		registerWebSearchTool(
+			pi,
+			settings,
+			settings.webSearchTool,
+			(id) => models.find((model) => model.id === id),
+			(model) => {
+				const region = regionOfBaseUrl(model.baseUrl) ?? settings.region;
+				return { region, fetch: fetchForRegion(region) };
+			},
+		);
+	}
 
 	pi.on("session_start", (_event, ctx) => {
 		recorded.clear();
