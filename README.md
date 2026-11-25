@@ -8,7 +8,7 @@ with Mantle's server-side [web search](https://docs.aws.amazon.com/bedrock/lates
 - Adds Mantle server tools (web search by default) to every request, and keeps the model's searches
   across turns.
 - Routes each model to a Region that serves it, configurable per model.
-- Offers a `bedrock_web_search` tool to models of other providers, which runs the search through a
+- Offers a `web_search` tool to models of other providers, which runs the search through a
   Mantle GPT model.
 
 ## Why this exists
@@ -74,7 +74,7 @@ fields are optional.
 | `regions` | More Regions to look for models in, after `region`, in order of preference | none |
 | `models.<id>.region` | Pin a model to a Region. The model is offered even when the Region's model list omits it | none |
 | `serverTools` | Responses server tools added unchanged to every request. `[]` turns them off | web search, see below |
-| `webSearchTool` | The `bedrock_web_search` tool for other providers' models: `model` and `reasoningEffort` of the search requests. `false` turns the tool off | `openai.gpt-5.6-luna`, `low` |
+| `webSearchTool` | The `web_search` tool for other providers' models: `model` and `reasoningEffort` of the search requests. `false` turns the tool off | `openai.gpt-5.6-luna`, `low` |
 
 Settings are read when the extension loads (pi start or `/reload`). Project settings
 (`.pi/settings.json`) are not read: pi does not let extensions read settings while loading, and the
@@ -114,7 +114,7 @@ search, or a Lambda or AgentCore Gateway connector:
 
 ### Web search for other models
 
-The extension registers a `bedrock_web_search` tool. A model of any other provider, for example
+The extension registers a `web_search` tool. A model of any other provider, for example
 Claude on `amazon-bedrock`, can call it with a query. The tool sends one Responses request with the
 `web_search` server tools from `serverTools` (or the default one) to the `webSearchTool.model`
 model, in that model's Region, and returns the answer with a list of cited sources. The search

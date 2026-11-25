@@ -4,7 +4,7 @@
 
 ### Added
 
-- `bedrock_web_search` tool for models of other providers, which searches through a Mantle GPT
+- `web_search` tool for models of other providers, which searches through a Mantle GPT
   model. Configure it with `webSearchTool`; Mantle's own GPT models do not get it.
 
 ### Changed

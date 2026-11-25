@@ -1,4 +1,4 @@
-// The `bedrock_web_search` tool: lets models of other providers search the web through a Mantle
+// The `web_search` tool: lets models of other providers search the web through a Mantle
 // GPT model and its server-side web search. Mantle's own GPT models search natively, so their
 // requests leave this tool out.
 
@@ -16,7 +16,7 @@ export interface WebSearchToolDetails {
 	sources: CitedSource[];
 }
 
-export const WEB_SEARCH_TOOL_NAME = "bedrock_web_search";
+export const WEB_SEARCH_TOOL_NAME = "web_search";
 
 // The searching model answers a query for another model, so it should report facts and sources
 // rather than chat.

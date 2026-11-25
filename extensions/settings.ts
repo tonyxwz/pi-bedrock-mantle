@@ -9,7 +9,7 @@ export interface MantleModelSettings {
 	region?: string;
 }
 
-/** The `bedrock_web_search` tool offered to models of other providers. */
+/** The `web_search` tool offered to models of other providers. */
 export interface WebSearchToolSettings {
 	/** Mantle model that runs the searches. */
 	model: string;
